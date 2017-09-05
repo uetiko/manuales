@@ -4,3 +4,4 @@ Así que nada, he aquí la tabla de conenidos
 
 ## Manules
 - [Instalar mysql desde el código fuente](mysql/install.md)
+- [Instalar python 3.6 sobre centos](pythno/install_python3_6.md)
