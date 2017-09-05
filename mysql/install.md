@@ -57,7 +57,7 @@ cd /usr/local/src
 curl -sL https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.19.tar.gz | tar xz
 cd mysql-5.7.19/
 less README && less INSTALL
-cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql/5.5.28 -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_bin
+cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql/5.7.19 -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_bin
 make
 make install
 ```
