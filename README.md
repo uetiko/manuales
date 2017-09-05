@@ -2,8 +2,5 @@ Este repositorio es para poner uno que otro manual de cosas que he hecho (Alguna
 
 Así que nada, he aquí la tabla de conenidos
 
-
-
-
-
-[Istalar mysql desde el código fuente](mysql/install.md)
+## Manules
+- [Instalar mysql desde el código fuente](mysql/install.md)
