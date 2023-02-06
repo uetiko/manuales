@@ -101,10 +101,10 @@ class UpgradeData implements UpgradeDataInterface
         ];
 
         $role->save();
-		$rule = $this->ruleFactory->create();
-		$rule->setRoleId(
-			$role->getId()
-		)->setResources($resources)->saveRel();
+	$rule = $this->ruleFactory->create();
+	$rule->setRoleId(
+		$role->getId()
+	)->setResources($resources)->saveRel();
 
         $setup->endSetup();
     }
