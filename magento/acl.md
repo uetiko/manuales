@@ -52,6 +52,7 @@ namespace {Vendor}\{Module}\Setup;
 
 use Magento\Authorization\Model\Acl\Role\Group
 use Magento\Authorization\Model\RoleFactory;
+use Magento\Authorization\Model\RulesFactory;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
@@ -62,13 +63,15 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @var RoleFactory
      */
-    private $roleFactory;
+    private RoleFactory $roleFactory;
+	private RuleFactory $ruleFactory;
 
     /**
      * @param RoleFactory $roleFactory
      */
     public function __construct(
-        RoleFactory $roleFactory
+        RoleFactory $roleFactory,
+		RuleFactory $ruleFactory
     ) {
         $this->roleFactory = $roleFactory;
     }
@@ -97,14 +100,81 @@ class UpgradeData implements UpgradeDataInterface
             '{Vendor}_{Module}::{sub_resource_id}',
         ];
 
-        $role->setResources($resources);
         $role->save();
+		$rule = $this->ruleFactory->create();
+		$rule->setRoleId(
+			$role->getId()
+		)->setResources($resources)->saveRel();
 
         $setup->endSetup();
     }
 }
 ```
 
+El siguiente código ejemplifica como podemos agregar mas Recursos a un rol existente que ya tenga Recursos asignados previamente.
+
+```php
+<?php
+
+namespace {Vendor}\{Module}\Setup;
+
+use Magento\Authorization\Model\RoleFactory;
+use Magento\Authorization\Model\RulesFactory;
+use Magento\Authorization\Model\Acl\AclRetriever;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\ModuleDataSetupInterface;
+use Magento\Framework\Setup\UpgradeDataInterface;
+
+class UpgradeData implements UpgradeDataInterface
+{
+    /**
+     * @var RoleFactory
+     */
+    private RoleFactory $roleFactory;
+    private RulesFactory $ruleFactory;
+    private AclRetriever $aclRetriever;
+
+    /**
+     * @param RoleFactory $roleFactory
+     */
+    public function __construct(
+        RoleFactory $roleFactory,
+        RulesFactory $ruleFactory,
+        AclRetriever $aclRetriever
+    ) {
+        $this->roleFactory = $roleFactory;
+        $this->ruleFactory = $ruleFactory;
+        $this->aclRetriever = $aclRetriever;
+    }
+
+    /**
+     * En este ejemplo, se le agregan los recursos al rol "Desarrollador" para que pueda acceder a los modulos
+     *
+     * El array de resouces son los modulos o recursos a los que el rol podra tener acceso.
+     */
+    public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
+    {
+        if (version_compare($context->getVersion(), '1.0.1', '<')) {
+            /** @var Magento\Authorization\Model\Role $role */
+            $role = $this->roleFactory->create()->load('Desarrollador', 'role_name');
+            $resources = $this->aclRetriever->getAllowedResourcesByRole(
+                $role->getId()
+            );
+            $resources = array_merge($resources, [
+                'Movil_Regulatorio::regulatorio',
+                'Movil_Regulatorio::report',
+                'Movil_Regulatorio::clientes'
+            ]);
+            $this->ruleFactory->create()->setRoleId(
+                $role->getId()
+            )->setResources($resources)->saveRel();
+        }
+
+        $setup->endSetup();
+    }
+}
+
+```
 ## Restringir el acceso a usuarios
 
 En le modulo, cree el siguiente archivo `etc/adminhtml/menu.xml`, este archivo creara un menú que estará oculto para los usuarios no autorizados. Los atributos en los nodos determinan a que recursos pueden acceder
